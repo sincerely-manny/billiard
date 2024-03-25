@@ -63,3 +63,7 @@ canvas {
 #context-menu li label input {
     visibility: hidden;
 }
+
+.caption {
+    margin-bottom: 3rem;
+}
