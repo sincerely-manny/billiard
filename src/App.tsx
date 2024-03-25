@@ -9,12 +9,13 @@ const App = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const balls = useRef<Ball[]>([]);
 
-    const [contextMenuOpts, setContextMenuOpts] = useState<ContextMenuProps & { visible: boolean }>({
+    const [contextMenuOpts, setContextMenuOpts] = useState<ContextMenuProps & { visible: boolean; key: string }>({
         x: 0,
         y: 0,
         selected: '',
         setSelected: () => {},
         visible: false,
+        key: '',
     });
 
     const mouseEvent = useRef<{ mouseDown: number; mouseUp: number; ball?: Ball }>({
@@ -78,8 +79,8 @@ const App = () => {
     const handleClick = (e: MouseEvent<HTMLCanvasElement>) => {
         e.preventDefault();
         const ball = getBall(e);
+        setContextMenuOpts({ ...contextMenuOpts, visible: false });
         if (!ball) {
-            setContextMenuOpts({ ...contextMenuOpts, visible: false });
             return;
         }
         setContextMenuOpts({
@@ -88,6 +89,7 @@ const App = () => {
             visible: true,
             selected: ball.Color,
             setSelected: ball.setColor,
+            key: ball.Color,
         });
     };
     const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
@@ -132,6 +134,7 @@ const App = () => {
                     y={contextMenuOpts.y}
                     selected={contextMenuOpts.selected}
                     setSelected={contextMenuOpts.setSelected}
+                    key={contextMenuOpts.key}
                 />
             ) : null}
         </>
