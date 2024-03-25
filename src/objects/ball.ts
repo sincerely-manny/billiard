@@ -79,8 +79,23 @@ export class Ball {
         this.ctx.shadowBlur = 10;
         this.ctx.shadowOffsetX = 0;
         this.ctx.shadowOffsetY = 0;
+
+        // hex to RGB
+        const r = parseInt(this.color.substring(1, 3), 16);
+        const g = parseInt(this.color.substring(3, 5), 16);
+        const b = parseInt(this.color.substring(5, 7), 16);
+        const glareR = Math.min(r + 100, 255);
+        const glareG = Math.min(g + 100, 255);
+        const glareB = Math.min(b + 100, 255);
+
+        const gradient = this.ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.4, `rgb(${glareR}, ${glareG}, ${glareB})`);
+        gradient.addColorStop(1, this.color);
+
+        this.ctx.fillStyle = gradient;
+
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = this.color;
         this.ctx.fill();
         this.ctx.closePath();
         this.ctx.shadowColor = 'transparent';
