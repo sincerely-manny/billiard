@@ -118,7 +118,7 @@ const App = () => {
 
     return (
         <>
-            <p className="caption">Drag a ball to start fun. Click a ball to change it's color.</p>
+            <p className="caption">Drag a ball to start fun. Click a ball to change its color.</p>
             <canvas
                 ref={canvasRef}
                 width={1100}
