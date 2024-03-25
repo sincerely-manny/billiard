@@ -1,14 +1,34 @@
 export const ballColors = [
-    '#FF6633',
-    '#FFB399',
-    '#FF33FF',
-    '#FFFF99',
-    '#00B3E6',
-    '#E6B333',
-    '#3366E6',
-    '#999966',
-    '#99FF99',
-    '#B34D4D',
+    '#d90bbf',
+    '#f74b49',
+    '#9e06e0',
+    '#0d42d1',
+    '#ee8483',
+    '#30d575',
+    '#8b1c7b',
+    '#f3e6f4',
+    '#890c16',
+    '#4c08b9',
+    '#1df5cf',
+    '#1dc520',
+    '#cd4e02',
+    '#6c791d',
+    '#8b7253',
+    '#b3c99d',
+    '#0b9b81',
+    '#3b5174',
+    '#45da43',
+    '#ed2b9f',
+    '#b2d860',
+    '#6662f3',
+    '#5a66d1',
+    '#7a230c',
+    '#0852b0',
+    '#39a6f3',
+    '#2d8d3b',
+    '#41b17a',
+    '#0c2b22',
+    '#d876bc',
 ];
 
 const animationSpeed = 1;
@@ -50,10 +70,17 @@ export class Ball {
 
     draw() {
         this.ctx.beginPath();
+        this.ctx.shadowColor = 'black';
+        this.ctx.shadowBlur = 10;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        // this.ctx.strokeStyle = 'black';
+        // this.ctx.stroke();
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
         this.ctx.closePath();
+        this.ctx.shadowColor = 'transparent';
     }
 
     update() {
@@ -98,6 +125,10 @@ export class Ball {
         return this.y;
     }
 
+    get Color() {
+        return this.color;
+    }
+
     setVelocity(v: number) {
         this.velocity = Math.max(0, v);
     }
@@ -110,8 +141,15 @@ export class Ball {
         this.angle = angle;
     }
 
+    setColorUnbinded(c: string) {
+        this.color = c;
+        this.update();
+    }
+
+    setColor = this.setColorUnbinded.bind(this);
+
     reflect(reflectionAngle: number) {
-        this.setAngle(2 * (reflectionAngle - 90) - this.angle);
+        this.setAngle(2 * reflectionAngle - this.angle);
         this.setVelocity(this.velocity - resilience);
     }
 
@@ -166,7 +204,5 @@ export class Ball {
         this.setAngle(newAngle1);
         ball2.setVelocity(u2 - resilience);
         ball2.setAngle(newAngle2);
-
-        console.log('Collision occurred!');
     }
 }

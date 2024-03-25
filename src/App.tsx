@@ -1,12 +1,13 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, MouseEvent, useState } from 'react';
 import { Ball, ballColors } from './objects/ball';
 import newTable from './objects/table';
+import ContextMenu, { ContextMenuProps } from './components/ContextMenu';
 
 function handleWallCollision(ball: Ball, canvas: HTMLCanvasElement) {
-    const leftAngle = 180; // Angle of the left wall is 180 degrees
-    const rightAngle = 0; // Angle of the right wall is 0 degrees
-    const topAngle = 270; // Angle of the top wall is 270 degrees
-    const bottomAngle = 90; // Angle of the bottom wall is 90 degrees
+    const leftAngle = 90; // Angle of the left wall
+    const rightAngle = 90; // Angle of the right wall
+    const topAngle = 0; // Angle of the top wall
+    const bottomAngle = 0; // Angle of the bottom wall
 
     if (ball.Boundaries.left <= 0) {
         ball.reflect(leftAngle);
@@ -30,6 +31,14 @@ const App = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const balls = useRef<Ball[]>([]);
 
+    const [contextMenuOpts, setContextMenuOpts] = useState<ContextMenuProps & { visible: boolean }>({
+        x: 0,
+        y: 0,
+        selected: '',
+        setSelected: () => {},
+        visible: false,
+    });
+
     useEffect(() => {
         if (!canvasRef.current) {
             return () => {};
@@ -42,8 +51,8 @@ const App = () => {
 
         let animationFrameId: number;
 
-        // Create balls
-        for (let i = 0; i < 10; i++) {
+        balls.current = []; /* useEffect runs twise in dev mode */
+        for (let i = 0; i < 1; i++) {
             const radius = Math.random() * 30 + 10; // Random radius between 10 and 40
             const x = Math.random() * (canvas.width - radius * 2) + radius; // Random x position
             const y = Math.random() * (canvas.height - radius * 2) + radius; // Random y position
@@ -78,7 +87,45 @@ const App = () => {
         };
     }, []);
 
-    return <canvas ref={canvasRef} width={1100} height={500} />;
+    const handleClick = (e: MouseEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
+        const x = e.clientX - e.currentTarget.offsetLeft;
+        const y = e.clientY - e.currentTarget.offsetTop;
+
+        const selectedBall = balls.current.find((ball) => {
+            const deltaX = ball.X - x;
+            const deltaY = ball.Y - y;
+            const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+            return distance <= ball.Radius;
+        });
+        if (!selectedBall) {
+            setContextMenuOpts({ ...contextMenuOpts, visible: false });
+            return;
+        }
+
+        setContextMenuOpts({
+            x: e.clientX,
+            y: e.clientY,
+            visible: true,
+            selected: selectedBall.Color,
+            setSelected: selectedBall.setColor,
+        });
+        console.log(selectedBall);
+    };
+
+    return (
+        <>
+            <canvas ref={canvasRef} width={1100} height={500} onClick={handleClick} />
+            {contextMenuOpts.visible ? (
+                <ContextMenu
+                    x={contextMenuOpts.x}
+                    y={contextMenuOpts.y}
+                    selected={contextMenuOpts.selected}
+                    setSelected={contextMenuOpts.setSelected}
+                />
+            ) : null}
+        </>
+    );
 };
 
 export default App;
