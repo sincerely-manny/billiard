@@ -1,7 +1,7 @@
-import { useRef, useEffect, MouseEvent, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import ContextMenu, { ContextMenuProps } from './components/ContextMenu';
 import { Ball, ballColors } from './objects/ball';
 import newTable from './objects/table';
-import ContextMenu, { ContextMenuProps } from './components/ContextMenu';
 
 const clickThreshold = 100;
 
@@ -24,14 +24,9 @@ const App = () => {
     });
 
     useEffect(() => {
-        if (!canvasRef.current) {
-            return () => {};
-        }
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            return () => {};
-        }
+        const ctx = canvas?.getContext('2d');
+        if (!ctx || !canvas) return () => {};
 
         let animationFrameId: number;
 
@@ -49,9 +44,6 @@ const App = () => {
 
         // Animation loop
         const animate = () => {
-            if (!ctx) {
-                return;
-            }
             animationFrameId = requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             newTable(ctx);
@@ -85,13 +77,11 @@ const App = () => {
 
     const handleClick = (e: MouseEvent<HTMLCanvasElement>) => {
         e.preventDefault();
-
         const ball = getBall(e);
         if (!ball) {
             setContextMenuOpts({ ...contextMenuOpts, visible: false });
             return;
         }
-
         setContextMenuOpts({
             x: e.clientX,
             y: e.clientY,
@@ -100,7 +90,6 @@ const App = () => {
             setSelected: ball.setColor,
         });
     };
-
     const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
         mouseEvent.current.mouseDown = Date.now();
         mouseEvent.current.mouseUp = 0;
