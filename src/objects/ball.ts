@@ -52,7 +52,7 @@ export class Ball {
 
     private captured = false;
 
-    private lastUpdate;
+    private lastUpdate: number;
 
     constructor(
         x: number,
