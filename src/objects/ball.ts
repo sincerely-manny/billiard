@@ -50,6 +50,10 @@ export class Ball {
 
     private ctx: CanvasRenderingContext2D;
 
+    private captured = false;
+
+    private lastUpdate;
+
     constructor(
         x: number,
         y: number,
@@ -66,6 +70,7 @@ export class Ball {
         this.radius = radius;
         this.color = color;
         this.ctx = ctx;
+        this.lastUpdate = Date.now();
     }
 
     draw() {
@@ -75,8 +80,6 @@ export class Ball {
         this.ctx.shadowOffsetX = 0;
         this.ctx.shadowOffsetY = 0;
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        // this.ctx.strokeStyle = 'black';
-        // this.ctx.stroke();
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
         this.ctx.closePath();
@@ -84,6 +87,10 @@ export class Ball {
     }
 
     update() {
+        if (this.captured) {
+            this.draw();
+            return;
+        }
         const v = Math.max(this.velocity, 0);
         const radians = (this.angle * Math.PI) / 180;
         const deltaX = v * Math.cos(radians) * animationSpeed;
@@ -92,8 +99,9 @@ export class Ball {
         this.x += deltaX;
         this.y += deltaY;
         this.setVelocity(this.velocity - friction);
+        this.lastUpdate = Date.now();
 
-        this.draw(); // Draw the updated ball
+        this.draw();
     }
 
     get Velocity() {
@@ -130,7 +138,9 @@ export class Ball {
     }
 
     setVelocity(v: number) {
-        this.velocity = Math.max(0, v);
+        let newV = Math.max(0, v);
+        newV = Math.min(newV, 15); // Speed limit
+        this.velocity = newV;
     }
 
     setAngle(a: number) {
@@ -141,6 +151,29 @@ export class Ball {
         this.angle = angle;
     }
 
+    uncapture() {
+        this.captured = false;
+    }
+
+    drag(x: number, y: number) {
+        this.captured = true;
+        const time = Date.now();
+        const deltaTime = time - this.lastUpdate;
+
+        const distance = Math.sqrt((this.x - x) ** 2 + (this.y - y) ** 2);
+        const deltaTimeInSeconds = deltaTime / 10;
+        const speed = distance / deltaTimeInSeconds;
+        const angleRad = Math.atan2(y - this.y, x - this.x);
+        const angleDeg = angleRad * (180 / Math.PI);
+
+        this.x = x;
+        this.y = y;
+        this.lastUpdate = time;
+        this.setVelocity(speed);
+        this.setAngle(angleDeg);
+        this.draw();
+    }
+
     setColorUnbinded(c: string) {
         this.color = c;
         this.update();
@@ -148,7 +181,30 @@ export class Ball {
 
     setColor = this.setColorUnbinded.bind(this);
 
-    reflect(reflectionAngle: number) {
+    reflect() {
+        const { width, height } = this.ctx.canvas;
+        let reflectionAngle = null;
+
+        if (this.Boundaries.left <= 0) {
+            this.x = this.radius;
+            reflectionAngle = 90;
+        }
+        if (this.Boundaries.right >= width) {
+            this.x = width - this.radius;
+            reflectionAngle = 90;
+        }
+        if (this.Boundaries.top <= 0) {
+            this.y = this.radius;
+            reflectionAngle = 0;
+        }
+        if (this.Boundaries.bottom >= height) {
+            this.y = height - this.radius;
+            reflectionAngle = 0;
+        }
+        if (reflectionAngle === null) {
+            return;
+        }
+
         this.setAngle(2 * reflectionAngle - this.angle);
         this.setVelocity(this.velocity - resilience);
     }
